@@ -67,7 +67,7 @@ class BaseDocReader:
 
             # Remove non-alphanumeric characters and not only numbers
             doc["tokens"] = [
-                token for token in doc["tokens"] if token.isalnum() and not token.isdigit()
+                token for token in doc["tokens"] if token.isalnum() and not token.isdigit() or "'" in token
             ]
 
             # Remove apostrophes in the middle of a token
