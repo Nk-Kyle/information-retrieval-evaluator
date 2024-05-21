@@ -2,6 +2,7 @@ import nltk
 import pandas as pd
 from collections import defaultdict
 from typing import List
+import string
 
 nltk.download("stopwords")
 
@@ -22,7 +23,7 @@ class BaseDocReader:
         self.docs = self.get_docs()
         self.tf_table = None
         self.wc_table = defaultdict(int)
-        self.stopwords = set(nltk.corpus.stopwords.words(lang))
+        self.stopwords = set(nltk.corpus.stopwords.words(lang) + list(string.ascii_lowercase))
         self.word_set = set()
 
         # Parse the documents
@@ -64,10 +65,13 @@ class BaseDocReader:
             # Lowercase the tokens to normalize
             doc["tokens"] = [token.lower() for token in doc["tokens"]]
 
-            # Remove non-alphanumeric characters but keep apostrophes
+            # Remove non-alphanumeric characters and not only numbers
             doc["tokens"] = [
-                token for token in doc["tokens"] if token.isalnum() or token == "'"
+                token for token in doc["tokens"] if token.isalnum() and not token.isdigit()
             ]
+
+            # Remove apostrophes in the middle of a token
+            doc["tokens"] = [token.replace("'", "") for token in doc["tokens"]]
 
             # Remove apostrophes at the beginning or end of a token
             doc["tokens"] = [token.strip("'") for token in doc["tokens"]]
