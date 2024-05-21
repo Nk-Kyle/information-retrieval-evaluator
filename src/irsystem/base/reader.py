@@ -15,6 +15,7 @@ class BaseDocReader:
         docs (list): A list of dictionaries, where each dictionary represents a document.
         word_set (set): A set of unique words in the documents.
     """
+    stemmer = nltk.PorterStemmer()
 
     def __init__(self, file_path, lang="english"):
         self.file_path = file_path
@@ -47,7 +48,7 @@ class BaseDocReader:
         """
         raise NotImplementedError
 
-    def parse_docs(self):
+    def parse_docs(self, stem=True):
         """
         Parse the documents into a list of dictionaries.
 
@@ -75,6 +76,11 @@ class BaseDocReader:
             doc["tokens"] = [
                 token for token in doc["tokens"] if token not in self.stopwords
             ]
+
+            # Stemming
+            if stem:
+                doc["tokens"] = [self.stemmer.stem(token) for token in doc["tokens"]]
+
             self.word_set.update(doc["tokens"])
 
     def build_doc_stats(self):
@@ -84,9 +90,7 @@ class BaseDocReader:
         - Word count table
         """
 
-        # Create dataframes from the word_set
         word_list = list(self.word_set)
-        # Order the word_list
         word_list.sort()
 
         # Create a word count table
