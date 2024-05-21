@@ -1,7 +1,9 @@
 from base.choices import TFMode, IDFMode, NormMode
 import math
 import pandas as pd
-
+import warnings
+# Suppress FutureWarning messages
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class Converter:
     @staticmethod
@@ -55,6 +57,33 @@ class Converter:
             )
 
         return value_table
+    
+    @staticmethod
+    def invert(value_table: pd.DataFrame) -> pd.DataFrame:
+        """
+        Invert the document statistics.
+
+        Args:
+            value_table (pd.DataFrame): The document statistics to invert.
+
+        Returns:
+            pd.DataFrame: The inverted document statistics, as inverted file.
+        """
+
+        # for each term, get the list of documents that contain it
+        # each row is a term, column 1 is the document id, column 2 is the tf-idf value
+        # term can be repeated in the first column, i.e. multiple rows with the same term but different document id, index on term
+        inverted_file = pd.DataFrame(columns=["term", "doc_id", "tfidf"])
+        for term in value_table.columns:
+            # get the documents that contain the term
+            docs = value_table[value_table[term] > 0][term]
+            # create a dataframe with the term and the document id and tfidf value
+            term_df = pd.DataFrame({"term": term, "doc_id": docs.index, "tfidf": docs.values})
+            # concatenate the dataframe to the inverted file
+            inverted_file = pd.concat([inverted_file, term_df])
+
+        return inverted_file
+
 
 
 if __name__ == "__main__":
@@ -70,6 +99,6 @@ if __name__ == "__main__":
     reader = AdiDocReader(file_path)
     converter = Converter()
     res = converter.convert(
-        reader.tf_table, reader.wc_table, TFMode.A, IDFMode.T, NormMode.C
+        reader.tf_table, reader.wc_table, TFMode.N, IDFMode.T, NormMode.N
     )
-    print(res)
+    res = converter.invert(res)
