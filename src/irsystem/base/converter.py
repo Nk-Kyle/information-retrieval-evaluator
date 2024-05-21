@@ -1,4 +1,5 @@
 from base.choices import TFMode, IDFMode, NormMode
+import math
 import pandas as pd
 
 
@@ -6,7 +7,7 @@ class Converter:
     @staticmethod
     def convert(
         tftable: pd.DataFrame,
-        wc_dict: dict,
+        wc_table: dict,
         tfmode: TFMode = TFMode.N,
         idfmode: IDFMode = IDFMode.N,
         normmode: NormMode = NormMode.N,
@@ -29,7 +30,7 @@ class Converter:
         if tfmode == TFMode.N:
             value_table = tftable.copy(deep=True)
         elif tfmode == TFMode.L:
-            value_table = tftable.map(lambda x: 1 + x if x > 0 else 0)
+            value_table = tftable.map(lambda x: 1 + math.log(x) if x > 0 else 0)
         elif tfmode == TFMode.A:
             max_tf = tftable.max(axis=1)
             value_table = tftable.div(max_tf, axis=0).mul(0.5).add(0.5)
@@ -40,9 +41,10 @@ class Converter:
         if idfmode == IDFMode.N:
             pass
         elif idfmode == IDFMode.T:
-            value_table = value_table.mul(
-                pd.Series(wc_dict).apply(lambda x: 1 / x), axis=1
+            idf_table = pd.Series(
+                {term: math.log(len(wc_table) / wc) for term, wc in wc_table.items()}
             )
+            value_table = value_table.mul(idf_table, axis=1)
 
         # Calculate the normalization values
         if normmode == NormMode.N:
