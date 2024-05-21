@@ -20,13 +20,16 @@ Create an IR system evaluator from a predetermined dataset. Evaluation is based 
         Base class, most logic lives here
 
         -   choices : List of choices, i.e. conversion modes
-        -   reader : Base reader class, reads a document collection to memory
         -   converter : Converts a TF table based on conversion modes
+        -   parser : parses string to tokens, including stemming
+        -   query : Base query reader, reads a query collection to memory
+        -   reader : Base reader class, reads a document collection to memory
 
     -   adi
 
         ADI test collection
 
+        -   query : Child class from base/query for ADI test collection
         -   reader : Child class from base/reader for ADI test collection
         -   data : ADI data collection files
 
