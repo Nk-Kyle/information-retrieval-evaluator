@@ -11,6 +11,25 @@ Create an IR system evaluator from a predetermined dataset. Evaluation is based 
 3. Evaluate TF-IDF-Norm values of query
 4. Evaluate MAP values of queries
 
+## Structure
+
+-   src/irsystem
+
+    -   base
+
+        Base class, most logic lives here
+
+        -   choices : List of choices, i.e. conversion modes
+        -   reader : Base reader class, reads a document collection to memory
+        -   converter : Converts a TF table based on conversion modes
+
+    -   adi
+
+        ADI test collection
+
+        -   reader : Child class from base/reader for ADI test collection
+        -   data : ADI data collection files
+
 ## How To: Setup
 
 1. Create an environment
