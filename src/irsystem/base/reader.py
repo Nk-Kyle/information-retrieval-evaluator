@@ -1,7 +1,8 @@
+import math
 import nltk
 import pandas as pd
 from collections import defaultdict
-from typing import List
+from typing import Dict, List
 from base.parser import BaseParser
 
 
@@ -83,3 +84,20 @@ class BaseDocReader:
                 self.tf_table.at[doc["doc_id"], token] += 1
             for token in set(doc["tokens"]):
                 self.wc_table[token] += 1
+
+    def get_term_idfs(self) -> Dict[str, float]:
+        """
+        Extracts all term inverted document frequencies from stored
+        documents.
+
+        Returns:
+            Inverted document frequencies for each term.
+        """
+
+        idfs = {}
+        document_quantity = len(self.wc_table)
+
+        for (term, df) in self.wc_table.items():
+            idfs[term] = math.log(document_quantity / df)
+
+        return idfs

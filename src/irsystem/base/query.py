@@ -1,5 +1,42 @@
-from typing import List
+from dataclasses import dataclass
+from typing import Any, Dict, List
 from base.parser import BaseParser
+
+
+@dataclass
+class Query:
+    """
+    `Query` contains all information regarding a query, including
+    the query statement, tokens, term frequencies, and term weights.
+    """
+
+    id: int
+    content: str
+    tokens: List[str]
+    term_freqs: Dict[str, float]
+    term_weights: Dict[str, float]
+
+    @staticmethod
+    def from_raw(raw_query: Dict[str, Any]) -> "Query":
+        """
+        Converts raw query represented by a dictionary into
+        its corresponding `Query` object.
+
+        Args:
+            `raw_query`: raw representation of the query
+
+        Returns:
+            A `Query` equivalent for the raw query dictionary.
+        """
+
+        return Query(
+            raw_query["query_id"],
+            raw_query["query"],
+            raw_query["tokens"],
+            {},
+            {}
+        )
+
 
 class BaseQueryReader:
     """
@@ -29,7 +66,7 @@ class BaseQueryReader:
         ]
         """
         raise NotImplementedError
-    
+
     def parse_queries(self, stem=True):
         """
         Parse the queries into a list of dictionaries.
@@ -44,3 +81,12 @@ class BaseQueryReader:
         # Tokenization
         for query in self.queries:
             query["tokens"] = self.parser.parse(query["query"], stem)
+
+    def to_query_list(self) -> List[Query]:
+        """
+        Extracts parsed raw queries into a list of `Query`.
+
+        Returns:
+            A list of `Query`.
+        """
+        return [Query.from_raw(raw_query) for raw_query in self.queries]
