@@ -95,7 +95,7 @@ class BaseDocReader:
         """
 
         idfs = {}
-        document_quantity = len(self.wc_table)
+        document_quantity = len(self.docs)
 
         for (term, df) in self.wc_table.items():
             idfs[term] = math.log(document_quantity / df)
