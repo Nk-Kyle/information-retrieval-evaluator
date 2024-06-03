@@ -15,6 +15,7 @@ class Query:
     tokens: List[str]
     term_freqs: Dict[str, float]
     term_weights: Dict[str, float]
+    similarities: Dict[int, float]
 
     @staticmethod
     def from_raw(raw_query: Dict[str, Any]) -> "Query":
@@ -33,6 +34,7 @@ class Query:
             raw_query["query_id"],
             raw_query["query"],
             raw_query["tokens"],
+            {},
             {},
             {}
         )

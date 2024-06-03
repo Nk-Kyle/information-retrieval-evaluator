@@ -1,3 +1,11 @@
+# mac requirements:
+# import sys
+# import os
+
+# script_dir = os.path.dirname(os.path.abspath(__file__))
+# parent_dir = os.path.dirname(script_dir)
+# sys.path.append(parent_dir)
+
 from base.relevance import BaseRelevanceReader
 from base.reader import BaseDocReader
 from base.query import BaseQueryReader
@@ -36,6 +44,7 @@ class IRS:
             `query_weighting` term weighting method for queries
         """
 
+        # calculate tf-idf-normalized of documents
         term_weight = Converter.convert(
             self.doc_reader.tf_table,
             self.doc_reader.wc_table,
@@ -44,15 +53,18 @@ class IRS:
             doc_weighting.norm
         )
         term_weight = Converter.invert(term_weight)
+        # term_weight is in df of format: term | doc_id | weight
 
         term_idfs = self.doc_reader.get_term_idfs()
         queries = self.query_reader.to_query_list()
 
+        # calculate tfs of queries
         for query in queries:
             query.term_freqs = Converter.calc_term_frequency(
                 query.tokens, query_weighting.tf
             )
 
+        # calculate idfs of queries
         if query_weighting.idf == IDFMode.T:
             for query in queries:
                 query.term_weights = dict(
@@ -61,11 +73,47 @@ class IRS:
                     in query.term_freqs.items()
                 )
 
+        # normalize the query idfs
         if query_weighting.norm == NormMode.C:
             for query in queries:
                 query.term_weights = Converter.normalize(
                     query.term_weights)
+            # term_weights is in dict of format: term | weight
+                
+        # here we already have inverted files of queries and documents
+        # we can now calculate the similarity for each query
 
+        # first, create a nested dictionary from the term_weight DataFrame for fast lookups
+        term_weight_dict = {}
+        for idx, row in term_weight.iterrows():
+            term = row['term']
+            doc_id = row['doc_id']
+            tfidf = row['tfidf']
+            if term not in term_weight_dict:
+                term_weight_dict[term] = {}
+            term_weight_dict[term][doc_id] = tfidf
+
+        # iterate through queries
+        for query in queries:
+            # initialize similarities dictionary
+            query.similarities = {doc['doc_id']: 0 for doc in self.doc_reader.docs}
+
+            # iterate through all terms in the query
+            for term, weight in query.term_weights.items():
+                if term in term_weight_dict:
+                    # iterate through documents that have the term
+                    for doc_id, tfidf in term_weight_dict[term].items():
+                        if doc_id in query.similarities:
+                            # calculate the similarity
+                            query.similarities[doc_id] += weight * tfidf
+            print(query.similarities)
+
+        # sort by similarities
+        for query in queries:
+            query.similarities = dict(sorted(query.similarities.items(), key=lambda item: item[1], reverse=True))
+            print(query.similarities)
+        
+        # calculate the MAP for each query
         # TODO: actually evaluate the MAP for each query
 
 
@@ -81,6 +129,13 @@ if __name__ == '__main__':
     if os.getcwd().endswith("src"):
         doc_path = "irsystem/" + doc_path
         query_path = "irsystem/" + query_path
+
+    # mac requirements:
+    # base_path = os.path.dirname(os.path.abspath(__file__))
+    # doc_path = os.path.join(base_path, "..", "adi", "data", "adi.all")
+    # query_path = os.path.join(base_path, "..", "adi", "data", "adi.qry")
+    # doc_path = os.path.normpath(doc_path)
+    # query_path = os.path.normpath(query_path)
 
     irs = IRS(
         AdiDocReader(doc_path),
