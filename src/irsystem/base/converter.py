@@ -3,8 +3,9 @@ from base.choices import TFMode, IDFMode, NormMode
 import math
 import pandas as pd
 import warnings
+
 # Suppress FutureWarning messages
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 class Converter:
@@ -34,12 +35,13 @@ class Converter:
         if tfmode == TFMode.N:
             value_table = tftable.copy(deep=True)
         elif tfmode == TFMode.L:
-            value_table = tftable.map(
-                lambda x: 1 + math.log(x) if x > 0 else 0)
+            value_table = tftable.map(lambda x: 1 + math.log(x) if x > 0 else 0)
         elif tfmode == TFMode.A:
-            # axis = 1 -> by row
             max_tf = tftable.max(axis=1)
             value_table = tftable.div(max_tf, axis=0).mul(0.5).add(0.5)
+
+            # Replace values with 0 where the term frequency is 0
+            value_table = value_table.where(tftable > 0, 0)
         elif tfmode == TFMode.B:
             value_table = tftable.map(lambda x: 1 if x > 0 else 0)
 
@@ -48,8 +50,7 @@ class Converter:
             pass
         elif idfmode == IDFMode.T:
             idf_table = pd.Series(
-                {term: math.log(len(tftable) / wc)
-                 for term, wc in wc_table.items()}
+                {term: math.log(len(tftable) / wc) for term, wc in wc_table.items()}
             )
             # axis = 0?
             value_table = value_table.mul(idf_table, axis=1)
@@ -85,23 +86,21 @@ class Converter:
             docs = value_table[value_table[term] > 0][term]
             # create a dataframe with the term and the document id and tfidf value
             term_df = pd.DataFrame(
-                {"term": term, "doc_id": docs.index, "tfidf": docs.values})
+                {"term": term, "doc_id": docs.index, "tfidf": docs.values}
+            )
             # concatenate the dataframe to the inverted file
             inverted_file = pd.concat([inverted_file, term_df])
 
         return inverted_file
 
     @staticmethod
-    def calc_term_frequency(
-        terms: List[str],
-        mode: TFMode
-    ) -> Dict[str, float]:
+    def calc_term_frequency(terms: List[str], mode: TFMode) -> Dict[str, float]:
         """
         Calculates term frequency value for a sequence of terms
         using specified valuation method.
 
         Args:
-            `terms`: a list of terms of which term frequency is 
+            `terms`: a list of terms of which term frequency is
                      to be calculated
             `mode`: term frequency valuation method
 
@@ -120,29 +119,19 @@ class Converter:
             case TFMode.N:
                 return raw_tfs
             case TFMode.L:
-                return dict(
-                    (term, 1 + math.log(tf))
-                    for (term, tf)
-                    in raw_tfs.items()
-                )
+                return dict((term, 1 + math.log(tf)) for (term, tf) in raw_tfs.items())
             case TFMode.A:
                 max_freq = max(raw_tfs.values())
                 return dict(
-                    (term, .5 + .5 * tf / max_freq)
-                    for (term, tf)
-                    in raw_tfs.items()
+                    (term, 0.5 + 0.5 * tf / max_freq) for (term, tf) in raw_tfs.items()
                 )
             case TFMode.B:
-                return dict(
-                    (term, 1)
-                    for (term, _)
-                    in raw_tfs.items()
-                )
+                return dict((term, 1) for (term, _) in raw_tfs.items())
 
     @staticmethod
     def normalize(term_weights: Dict[str, float]) -> Dict[str, float]:
         """
-        Normalizes term weights vector by its length. 
+        Normalizes term weights vector by its length.
 
         Args:
             `term_weights`: term weights vector to be normalized
@@ -151,11 +140,7 @@ class Converter:
             Normalized term weights vector.
         """
         magnitude = math.sqrt(sum(tf * tf for tf in term_weights.values()))
-        return dict(
-            (term, tf / magnitude)
-            for (term, tf)
-            in term_weights.items()
-        )
+        return dict((term, tf / magnitude) for (term, tf) in term_weights.items())
 
 
 if __name__ == "__main__":
@@ -170,6 +155,7 @@ if __name__ == "__main__":
         file_path = "irsystem/" + file_path
     reader = AdiDocReader(file_path)
     converter = Converter()
+    print(reader.tf_table)
     res = converter.convert(
         reader.tf_table, reader.wc_table, TFMode.N, IDFMode.T, NormMode.N
     )
