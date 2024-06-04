@@ -45,13 +45,13 @@ class BaseQueryReader:
     Base class for reading queries from a file.
     """
 
-    def __init__(self, file_path, lang="english"):
+    def __init__(self, file_path, lang="english", stem: bool = True):
         self.file_path = file_path
         self.queries = self.get_queries()
         self.parser = BaseParser(lang)
 
         # Parse the queries
-        self.parse_queries()
+        self.parse_queries(stem)
 
     def get_queries(self) -> List[dict]:
         """
@@ -69,7 +69,7 @@ class BaseQueryReader:
         """
         raise NotImplementedError
 
-    def parse_queries(self, stem=True):
+    def parse_queries(self, stem: bool = True):
         """
         Parse the queries into a list of dictionaries.
 

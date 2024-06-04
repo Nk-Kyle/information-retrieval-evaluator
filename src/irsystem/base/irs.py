@@ -134,6 +134,8 @@ if __name__ == '__main__':
     from adi.query import AdiQueryReader
     from adi.relevance import AdiRelevanceReader
     import os
+    import itertools
+    import csv
 
     doc_path = "adi/data/adi.all"
     query_path = "adi/data/adi.qry"
@@ -154,14 +156,35 @@ if __name__ == '__main__':
     # query_path = os.path.normpath(query_path)
     # rel_path = os.path.normpath(rel_path)
 
+    # all combinations
+    stem = False
+    
+    tfs = ['n', 'l', 'a', 'b']
+    idfs = ['n', 't']
+    norms = ['n', 'c']
+
+    combinations = itertools.product(tfs, idfs, norms)
+    combinations = [''.join(combo) for combo in combinations]
+
     irs = IRS(
-        AdiDocReader(doc_path),
-        AdiQueryReader(query_path),
+        AdiDocReader(doc_path, stem=stem),
+        AdiQueryReader(query_path, stem=stem),
         AdiRelevanceReader(rel_path)
     )
 
-    doc_weighting = WeightingTriplet.from_str("atc")
-    query_weighting = WeightingTriplet.from_str("atc")
+    with open('../adi/adi_nostem.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['doc.query', 'map'])
+        
+        count = 0
+        for doc_combination in combinations:
+            for query_combination in combinations:
+                doc_weighting = WeightingTriplet.from_str(doc_combination)
+                query_weighting = WeightingTriplet.from_str(query_combination)
+                map_score = irs.eval(doc_weighting, query_weighting)
+                writer.writerow([f"{doc_combination}.{query_combination}", map_score])
+                count += 1
+                print(f"{count}/256")
 
-    map = irs.eval(doc_weighting, query_weighting)
-    print(map)
+    print("CSV file created succesfully.")
+

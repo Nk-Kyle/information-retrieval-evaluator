@@ -17,7 +17,7 @@ class BaseDocReader:
     """
     stemmer = nltk.PorterStemmer()
 
-    def __init__(self, file_path, lang="english"):
+    def __init__(self, file_path, lang="english", stem: bool = True):
         self.file_path = file_path
         self.docs = self.get_docs()
         self.tf_table = None
@@ -26,7 +26,7 @@ class BaseDocReader:
         self.parser = BaseParser(lang)
 
         # Parse the documents
-        self.parse_docs()
+        self.parse_docs(stem)
 
         # Build document stats
         self.build_doc_stats()
@@ -48,7 +48,7 @@ class BaseDocReader:
         """
         raise NotImplementedError
 
-    def parse_docs(self, stem=True):
+    def parse_docs(self, stem: bool = True):
         """
         Parse the documents into a list of dictionaries.
 
