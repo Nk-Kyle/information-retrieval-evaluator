@@ -63,6 +63,7 @@ class IRS:
             query.term_freqs = Converter.calc_term_frequency(
                 query.tokens, query_weighting.tf
             )
+            query.term_weights = query.term_freqs
 
         # calculate idfs of queries
         if query_weighting.idf == IDFMode.T:
@@ -70,7 +71,7 @@ class IRS:
                 query.term_weights = dict(
                     (term, tf * term_idfs.get(term, 0))
                     for (term, tf)
-                    in query.term_freqs.items()
+                    in query.term_weights.items()
                 )
 
         # normalize the query idfs
@@ -79,7 +80,7 @@ class IRS:
                 query.term_weights = Converter.normalize(
                     query.term_weights)
             # term_weights is in dict of format: term | weight
-                
+
         # here we already have inverted files of queries and documents
         # we can now calculate the similarity for each query
 
@@ -96,7 +97,8 @@ class IRS:
         # iterate through queries
         for query in queries:
             # initialize similarities dictionary
-            query.similarities = {doc['doc_id']: 0 for doc in self.doc_reader.docs}
+            query.similarities = {doc['doc_id']
+                : 0 for doc in self.doc_reader.docs}
 
             # iterate through all terms in the query
             for term, weight in query.term_weights.items():
