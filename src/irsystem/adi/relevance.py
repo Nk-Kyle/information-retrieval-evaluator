@@ -1,11 +1,3 @@
-# mac requirements:
-# import sys
-# import os
-
-# script_dir = os.path.dirname(os.path.abspath(__file__))
-# parent_dir = os.path.dirname(script_dir)
-# sys.path.append(parent_dir)
-
 from base import BaseRelevanceReader
 
 
@@ -49,19 +41,6 @@ class AdiRelevanceReader(BaseRelevanceReader):
                 else:
                     relevances[-1]["docs_id"].append(doc_id)
         return relevances
-
-    def convert_to_dict(self):
-        """
-        Convert list to dictionary for fast lookups.
-
-        Returns:
-            dict: A dictionary where the query_id is the key 
-                  and the list of relevant documents is the value.
-        """
-        relevances_dict = {}
-        for relevance in self.relevances:
-            relevances_dict[relevance["query_id"]] = relevance["docs_id"]
-        return relevances_dict
     
 if __name__ == "__main__":
     import os

@@ -130,16 +130,18 @@ class IRS:
         return average_map
 
 if __name__ == '__main__':
-    from adi.reader import AdiDocReader
-    from adi.query import AdiQueryReader
-    from adi.relevance import AdiRelevanceReader
+    # CHANGE IMPORT
+    from cran.reader import CranDocReader
+    from cran.query import CranQueryReader
+    from cran.relevance import CranRelevanceReader
     import os
     import itertools
     import csv
 
-    doc_path = "adi/data/adi.all"
-    query_path = "adi/data/adi.qry"
-    rel_path = "adi/data/adi.rel"
+    # CHANGE PATH
+    doc_path = "cran/data/cran.all"
+    query_path = "cran/data/cran.qry"
+    rel_path = "cran/data/cran.rel"
 
     print("Current working directory:", os.getcwd())
     if os.getcwd().endswith("src"):
@@ -149,14 +151,15 @@ if __name__ == '__main__':
 
     # mac requirements:
     # base_path = os.path.dirname(os.path.abspath(__file__))
-    # doc_path = os.path.join(base_path, "..", "adi", "data", "adi.all")
-    # query_path = os.path.join(base_path, "..", "adi", "data", "adi.qry")
-    # rel_path = os.path.join(base_path, "..", "adi", "data", "adi.rel")
+    # doc_path = os.path.join(base_path, "..", "cran", "data", "cran.all")
+    # query_path = os.path.join(base_path, "..", "cran", "data", "cran.qry")
+    # rel_path = os.path.join(base_path, "..", "cran", "data", "cran.rel")
     # doc_path = os.path.normpath(doc_path)
     # query_path = os.path.normpath(query_path)
     # rel_path = os.path.normpath(rel_path)
 
     # all combinations
+    # CHANGE STEM
     stem = False
     
     tfs = ['n', 'l', 'a', 'b']
@@ -167,12 +170,13 @@ if __name__ == '__main__':
     combinations = [''.join(combo) for combo in combinations]
 
     irs = IRS(
-        AdiDocReader(doc_path, stem=stem),
-        AdiQueryReader(query_path, stem=stem),
-        AdiRelevanceReader(rel_path)
+        CranDocReader(doc_path, stem=stem),
+        CranQueryReader(query_path, stem=stem),
+        CranRelevanceReader(rel_path)
     )
 
-    with open('../adi/adi_nostem.csv', mode='w', newline='') as file:
+    # CHANGE FILE NAME
+    with open('../cran/cran_nostem.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['doc.query', 'map'])
         

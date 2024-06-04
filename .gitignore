@@ -165,3 +165,8 @@ src/irsystem/base/data/
 src/irsystem/data/
 src/data/
 src/irsystem/adi/data/
+src/irsystem/cacm/data/
+src/irsystem/cran/data/
+src/irsystem/med/data/
+src/irsystem/npl/data/
+src/irsystem/time/data/

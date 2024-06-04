@@ -26,3 +26,15 @@ class BaseRelevanceReader:
         """
         raise NotImplementedError
 
+    def convert_to_dict(self):
+        """
+        Convert list to dictionary for fast lookups.
+
+        Returns:
+            dict: A dictionary where the query_id is the key 
+                  and the list of relevant documents is the value.
+        """
+        relevances_dict = {}
+        for relevance in self.relevances:
+            relevances_dict[relevance["query_id"]] = relevance["docs_id"]
+        return relevances_dict
