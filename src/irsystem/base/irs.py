@@ -34,7 +34,7 @@ class IRS:
         self.query_reader = query_reader
         self.relevance_reader = relevance_reader
 
-    def eval(self, doc_weighting: WeightingTriplet, query_weighting: WeightingTriplet):
+    def eval(self, doc_weighting: WeightingTriplet, query_weighting: WeightingTriplet, rank_limit: int = 15):
         """
         Evaluates the system MAP for each query in the test collection using
         specified term weighting methods.
@@ -106,42 +106,60 @@ class IRS:
                         if doc_id in query.similarities:
                             # calculate the similarity
                             query.similarities[doc_id] += weight * tfidf
-            print(query.similarities)
-
+        
         # sort by similarities
         for query in queries:
             query.similarities = dict(sorted(query.similarities.items(), key=lambda item: item[1], reverse=True))
-            print(query.similarities)
         
         # calculate the MAP for each query
-        # TODO: actually evaluate the MAP for each query
-
+        sum = 0
+        for query in queries:
+            relevance_docs = self.relevance_reader.convert_to_dict()[query.id]
+            retrieved_docs = list(query.similarities.keys())[:rank_limit]
+            retrieved_relevance = 0
+            map = 0
+            for docs_id in retrieved_docs:
+                if (docs_id in relevance_docs):
+                    retrieved_relevance += 1
+                    map += retrieved_relevance / (retrieved_docs.index(docs_id) + 1)
+            map /= len(relevance_docs)
+            sum += map
+        average_map = sum/len(queries)
+        return average_map
 
 if __name__ == '__main__':
     from adi.reader import AdiDocReader
     from adi.query import AdiQueryReader
+    from adi.relevance import AdiRelevanceReader
     import os
 
     doc_path = "adi/data/adi.all"
     query_path = "adi/data/adi.qry"
+    rel_path = "adi/data/adi.rel"
 
     print("Current working directory:", os.getcwd())
     if os.getcwd().endswith("src"):
         doc_path = "irsystem/" + doc_path
         query_path = "irsystem/" + query_path
+        rel_path = "irsystem/" + rel_path
 
     # mac requirements:
     # base_path = os.path.dirname(os.path.abspath(__file__))
     # doc_path = os.path.join(base_path, "..", "adi", "data", "adi.all")
     # query_path = os.path.join(base_path, "..", "adi", "data", "adi.qry")
+    # rel_path = os.path.join(base_path, "..", "adi", "data", "adi.rel")
     # doc_path = os.path.normpath(doc_path)
     # query_path = os.path.normpath(query_path)
+    # rel_path = os.path.normpath(rel_path)
 
     irs = IRS(
         AdiDocReader(doc_path),
         AdiQueryReader(query_path),
-        None
+        AdiRelevanceReader(rel_path)
     )
-    weighting = WeightingTriplet.from_str("atc")
 
-    irs.eval(weighting, weighting)
+    doc_weighting = WeightingTriplet.from_str("atc")
+    query_weighting = WeightingTriplet.from_str("atc")
+
+    map = irs.eval(doc_weighting, query_weighting)
+    print(map)

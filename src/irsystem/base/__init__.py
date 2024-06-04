@@ -1,5 +1,6 @@
 from .reader import BaseDocReader
 from .query import BaseQueryReader
+from .relevance import BaseRelevanceReader
 from .utils.downloader import download_nltk_data
 from pathlib import Path
 

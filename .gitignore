@@ -164,3 +164,4 @@ cython_debug/
 src/irsystem/base/data/
 src/irsystem/data/
 src/data/
+src/irsystem/adi/data/
