@@ -6,33 +6,33 @@ class CacmDocReader(BaseDocReader):
         docs = []
         doc = {}
         key = None
-        with open(file_path, 'r') as f:
+        with open(self.file_path, "r") as f:
             for line in f:
                 line = line.strip()
-                if line.startswith('.I'):
+                if line.startswith(".I"):
                     if doc:
                         docs.append(doc)
                     doc = {
-                        "doc_id": line.split()[1],
+                        "doc_id": int(line.split()[1]),
                         "title": "",
                         "author": "",
                         "bibliography": "",
-                        "content": ""
+                        "content": "",
                     }
                     key = None
-                elif line.startswith('.T'):
-                    key = 'title'
-                elif line.startswith('.A'):
-                    key = 'author'
-                elif line.startswith('.B'):
-                    key = 'bibliography'
-                elif line.startswith('.W'):
-                    key = 'content'
-                elif line.startswith(('.N', '.X', '.I')):
+                elif line.startswith(".T"):
+                    key = "title"
+                elif line.startswith(".A"):
+                    key = "author"
+                elif line.startswith(".B"):
+                    key = "bibliography"
+                elif line.startswith(".W"):
+                    key = "content"
+                elif line.startswith((".N", ".X", ".I")):
                     key = None
                 elif key:
                     doc[key] += line + " "
-                    
+
             if doc:
                 docs.append(doc)
 
