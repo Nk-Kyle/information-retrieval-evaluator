@@ -7,7 +7,7 @@ class TimeDocReader(BaseDocReader):
         with open(self.file_path, "r") as f:
             # Get whole sections delimited by "*TEXT"
             sections = f.read().split("*TEXT")[1:]
-            id = 1
+            # id = 1
 
             for section in sections:
                 if '*STOP' in section:
@@ -15,7 +15,8 @@ class TimeDocReader(BaseDocReader):
 
                 if section.strip():  # Ensure the section is not empty
                     lines = section.strip().split('\n')
-                    doc_id = id
+                    first_line = lines[0].strip()
+                    doc_id = int(first_line.split()[0])
                     
                     content = " ".join(line.strip() for line in lines[1:] if line.strip())
 
@@ -26,7 +27,7 @@ class TimeDocReader(BaseDocReader):
                         }
                     )
 
-                    id += 1
+                    # id += 1
 
         return docs
 
@@ -45,3 +46,4 @@ if __name__ == "__main__":
     print("Current working directory after alteration:", os.getcwd())
 
     reader = TimeDocReader(file_path)
+    print(reader.docs[-2:])
