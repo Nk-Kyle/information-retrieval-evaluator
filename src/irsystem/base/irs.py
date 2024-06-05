@@ -1,10 +1,9 @@
 # mac requirements:
-# import sys
-# import os
+import os
 
-# script_dir = os.path.dirname(os.path.abspath(__file__))
-# parent_dir = os.path.dirname(script_dir)
-# sys.path.append(parent_dir)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(script_dir)
+sys.path.append(parent_dir)
 
 from base.relevance import BaseRelevanceReader
 from base.reader import BaseDocReader
@@ -131,17 +130,17 @@ class IRS:
 
 if __name__ == '__main__':
     # CHANGE IMPORT
-    from cran.reader import CranDocReader
-    from cran.query import CranQueryReader
-    from cran.relevance import CranRelevanceReader
+    from med.reader import MedDocReader
+    from med.query import MedQueryReader
+    from med.relevance import MedRelevanceReader
     import os
     import itertools
     import csv
 
     # CHANGE PATH
-    doc_path = "cran/data/cran.all"
-    query_path = "cran/data/cran.qry"
-    rel_path = "cran/data/cran.rel"
+    doc_path = "med/data/med.all"
+    query_path = "med/data/med.qry"
+    rel_path = "med/data/med.rel"
 
     print("Current working directory:", os.getcwd())
     if os.getcwd().endswith("src"):
@@ -151,16 +150,16 @@ if __name__ == '__main__':
 
     # mac requirements:
     # base_path = os.path.dirname(os.path.abspath(__file__))
-    # doc_path = os.path.join(base_path, "..", "cran", "data", "cran.all")
-    # query_path = os.path.join(base_path, "..", "cran", "data", "cran.qry")
-    # rel_path = os.path.join(base_path, "..", "cran", "data", "cran.rel")
+    # doc_path = os.path.join(base_path, "..", "med", "data", "med.all")
+    # query_path = os.path.join(base_path, "..", "med", "data", "med.qry")
+    # rel_path = os.path.join(base_path, "..", "med", "data", "med.rel")
     # doc_path = os.path.normpath(doc_path)
     # query_path = os.path.normpath(query_path)
     # rel_path = os.path.normpath(rel_path)
 
     # all combinations
     # CHANGE STEM
-    stem = False
+    stem = True
     
     tfs = ['n', 'l', 'a', 'b']
     idfs = ['n', 't']
@@ -170,13 +169,13 @@ if __name__ == '__main__':
     combinations = [''.join(combo) for combo in combinations]
 
     irs = IRS(
-        CranDocReader(doc_path, stem=stem),
-        CranQueryReader(query_path, stem=stem),
-        CranRelevanceReader(rel_path)
+        MedDocReader(doc_path, stem=stem),
+        MedQueryReader(query_path, stem=stem),
+        MedRelevanceReader(rel_path)
     )
 
     # CHANGE FILE NAME
-    with open('../cran/cran_nostem.csv', mode='w', newline='') as file:
+    with open('./med/med_stem.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(['doc.query', 'map'])
         
